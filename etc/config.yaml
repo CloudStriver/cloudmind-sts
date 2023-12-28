@@ -1,0 +1,44 @@
+Name: sts
+ListenOn: 0.0.0.0:2003
+Mode: dev
+Elasticsearch:
+    Addresses:
+      - http://localhost:9200
+    Username: elastic
+    Password:
+##Monitoring
+Prometheus:
+  Host: 0.0.0.0
+  Port: 4003
+  Path: /metrics
+
+##Link Tracking
+Telemetry:
+  Name: sts
+  Endpoint: http://localhost:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger
+
+Log:
+  ServiceName: sts
+  Level: info
+  Mode: console
+  Encoding: plain
+
+Redis:
+  Host: localhost:36379
+  Type: node
+  Pass: admin
+  Key: ""
+Mongo:
+  Url: mongodb://localhost:27015/?connect=direct
+  DB: cloudmind_sts
+CacheConf:
+  - Host: localhost:36379
+    Pass: admin
+
+Etcd:
+  Hosts:
+    - localhost:2379
+  Key: sts
+
