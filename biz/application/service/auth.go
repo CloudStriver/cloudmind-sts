@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/consts"
-	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/convertor"
 	authmapper "github.com/CloudStriver/cloudmind-sts/biz/infrastructure/mapper/auth"
-	captcha "github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/captcha/puzzle_captcha"
+	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/captcha/puzzle_captcha"
+	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/email"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/types"
 	"github.com/CloudStriver/go-pkg/utils/pconvertor"
 	"github.com/CloudStriver/go-pkg/utils/uuid"
@@ -35,9 +35,25 @@ type AuthServiceImpl struct {
 	AuthMongMapper authmapper.AuthMongoMapper
 }
 
+var AuthSet = wire.NewSet(
+	wire.Struct(new(AuthServiceImpl), "*"),
+	wire.Bind(new(AuthService), new(*AuthServiceImpl)),
+)
+
 func (s *AuthServiceImpl) CheckEmail(ctx context.Context, req *gensts.CheckEmailReq) (resp *gensts.CheckEmailResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	resp = new(gensts.CheckEmailResp)
+	code, err := s.Redis.GetCtx(ctx, fmt.Sprintf("%s:%s", consts.EmailCode, req.Email))
+	if err != nil {
+		return resp, err
+	}
+
+	if code == "" {
+		resp.Error = "验证码已过期"
+	} else if code != req.Code {
+		resp.Error = "验证码错误"
+	}
+
+	return resp, nil
 }
 
 func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswordReq) (resp *gensts.SetPasswordResp, err error) {
@@ -84,22 +100,33 @@ func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswo
 }
 
 func (s *AuthServiceImpl) SendEmail(ctx context.Context, req *gensts.SendEmailReq) (resp *gensts.SendEmailResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	resp = new(gensts.SendEmailResp)
+	code, err := email.SendEmail(s.Config.EmailConf, req.Email, req.Subject)
+	if err != nil {
+		return resp, err
+	}
+
+	if err = s.Redis.SetexCtx(ctx, fmt.Sprintf("%s:%s", consts.EmailCode, req.Email), code, 60); err != nil {
+		logx.Errorf("Redis设置缓存异常[%v]\n", err)
+	}
+
+	return resp, nil
 }
 
 func (s *AuthServiceImpl) AddAuth(ctx context.Context, req *gensts.AddAuthReq) (resp *gensts.AddAuthResp, err error) {
 	resp = new(gensts.AddAuthResp)
-	if _, err = s.AuthMongMapper.Insert(ctx, convertor.AuthToAuthMapper(req.Auth)); err != nil {
+	auth := &authmapper.Auth{
+		PassWord: req.Password,
+		Role:     int32(req.Role),
+		Type:     int32(req.Type),
+		Key:      req.Key,
+		UserId:   req.UserId,
+	}
+	if _, err = s.AuthMongMapper.Insert(ctx, auth); err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
-
-var AuthSet = wire.NewSet(
-	wire.Struct(new(AuthServiceImpl), "*"),
-	wire.Bind(new(AuthService), new(*AuthServiceImpl)),
-)
 
 func (s *AuthServiceImpl) CreateCaptcha(ctx context.Context, _ *gensts.CreateCaptchaReq) (resp *gensts.CreateCaptchaResp, err error) {
 	resp = new(gensts.CreateCaptchaResp)

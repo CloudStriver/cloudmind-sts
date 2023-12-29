@@ -42,3 +42,9 @@ Etcd:
     - localhost:2379
   Key: sts
 
+
+EmailConf:
+  Host: smtp.qcloudmail.com
+  Email: 2095621390@cloudmind.top
+  Password: 5201314LSls@
+  Port: 465

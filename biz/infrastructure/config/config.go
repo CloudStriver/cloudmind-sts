@@ -8,6 +8,12 @@ import (
 	"os"
 )
 
+type EmailConf struct {
+	Host     string
+	Port     int32
+	Password string
+	Email    string
+}
 type Config struct {
 	service.ServiceConf
 	ListenOn string
@@ -17,6 +23,7 @@ type Config struct {
 	}
 	CacheConf cache.CacheConf
 	Redis     *redis.RedisConf
+	EmailConf EmailConf
 }
 
 func NewConfig() (*Config, error) {

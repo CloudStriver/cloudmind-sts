@@ -5,8 +5,8 @@ import (
 )
 
 type CheckParams struct {
-	Point *captcha.Point `json:"point"`
-	Token string         `json:"token"`
+	Point *captcha.captcha `json:"point"`
+	Token string           `json:"token"`
 }
 type Token struct {
 	AccessToken  string
@@ -14,5 +14,5 @@ type Token struct {
 	ChatToken    string
 }
 type Data struct {
-	Point *captcha.Point `json:"point"`
+	Point *captcha.captcha `json:"point"`
 }
