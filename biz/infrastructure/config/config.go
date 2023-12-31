@@ -14,6 +14,11 @@ type EmailConf struct {
 	Password string
 	Email    string
 }
+
+type EtcdConf struct {
+	Hosts []string
+}
+
 type Config struct {
 	service.ServiceConf
 	ListenOn string
@@ -24,6 +29,7 @@ type Config struct {
 	CacheConf cache.CacheConf
 	Redis     *redis.RedisConf
 	EmailConf EmailConf
+	EtcdConf  EtcdConf
 }
 
 func NewConfig() (*Config, error) {

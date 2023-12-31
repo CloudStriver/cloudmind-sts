@@ -1,4 +1,4 @@
-Name: sts
+Name: cloudmind-sts
 ListenOn: 0.0.0.0:2003
 Mode: dev
 Elasticsearch:
@@ -37,10 +37,9 @@ CacheConf:
   - Host: localhost:36379
     Pass: admin
 
-Etcd:
+EtcdConf:
   Hosts:
     - localhost:2379
-  Key: sts
 
 
 EmailConf:
