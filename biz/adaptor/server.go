@@ -12,6 +12,10 @@ type StsServerImpl struct {
 	AuthService service.AuthService
 }
 
+func (s *StsServerImpl) Login(ctx context.Context, req *sts.LoginReq) (resp *sts.LoginResp, err error) {
+	return s.AuthService.Login(ctx, req)
+}
+
 func (s *StsServerImpl) CheckCaptcha(ctx context.Context, req *sts.CheckCaptchaReq) (res *sts.CheckCaptchaResp, err error) {
 	return s.AuthService.CheckCaptcha(ctx, req)
 }
@@ -28,8 +32,8 @@ func (s *StsServerImpl) CheckEmail(ctx context.Context, req *sts.CheckEmailReq) 
 	return s.AuthService.CheckEmail(ctx, req)
 }
 
-func (s *StsServerImpl) AddAuth(ctx context.Context, req *sts.AddAuthReq) (res *sts.AddAuthResp, err error) {
-	return s.AuthService.AddAuth(ctx, req)
+func (s *StsServerImpl) CreateAuth(ctx context.Context, req *sts.CreateAuthReq) (res *sts.CreateAuthResp, err error) {
+	return s.AuthService.CreateAuth(ctx, req)
 }
 
 func (s *StsServerImpl) CreateCaptcha(ctx context.Context, req *sts.CreateCaptchaReq) (res *sts.CreateCaptchaResp, err error) {

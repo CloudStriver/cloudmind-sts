@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
+	"github.com/CloudStriver/go-pkg/utils/util/log"
 	"github.com/zeromicro/go-zero/core/stores/monc"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
@@ -43,6 +45,23 @@ type (
 	}
 )
 
+func NewMongoMapper(config *config.Config) AuthMongoMapper {
+	conn := monc.MustNewModel(config.Mongo.URL, config.Mongo.DB, CollectionName, config.CacheConf)
+	_, err := conn.Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "type", Value: 1},
+			{Key: "key", Value: 1},
+		},
+		Options: options.Index().SetUnique(true),
+	})
+	if err != nil {
+		log.Error("创建索引异常[%v]\n", err)
+	}
+	return &MongoMapper{
+		conn: conn,
+	}
+}
+
 func (m *MongoMapper) UpdateByAuthKeyAndType(ctx context.Context, data *Auth) (*mongo.UpdateResult, error) {
 	data.UpdateAt = time.Now()
 	key := PrefixAuthCacheKey + fmt.Sprintf("%s:%d", data.Key, data.Type)
@@ -71,13 +90,6 @@ func (m *MongoMapper) FindOneByUserId(ctx context.Context, userId string) (*Auth
 		return &data, nil
 	default:
 		return nil, err
-	}
-}
-
-func NewMongoMapper(config *config.Config) AuthMongoMapper {
-	conn := monc.MustNewModel(config.Mongo.URL, config.Mongo.DB, CollectionName, config.CacheConf)
-	return &MongoMapper{
-		conn: conn,
 	}
 }
 
@@ -127,8 +139,4 @@ func (m *MongoMapper) Delete(ctx context.Context, id string) (int64, error) {
 	key := PrefixAuthCacheKey + id
 	res, err := m.conn.DeleteOne(ctx, key, bson.M{"_id": oid})
 	return res, err
-}
-
-func (m *MongoMapper) GetConn() *monc.Model {
-	return m.conn
 }
