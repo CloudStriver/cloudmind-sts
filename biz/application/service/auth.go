@@ -131,7 +131,7 @@ func (s *AuthServiceImpl) SendEmail(ctx context.Context, req *gensts.SendEmailRe
 	code, err := email.SendEmail(ctx, s.Config.EmailConf, req.Email, req.Subject)
 	if err != nil {
 		log.CtxError(ctx, "发送邮件异常[%v]\n", err)
-		return resp, consts.ErrEmailNotSend
+		return resp, err
 	}
 	if err = s.Redis.SetexCtx(ctx, fmt.Sprintf("%s:%s", consts.EmailCode, req.Email), code, 300); err != nil {
 		log.CtxError(ctx, "Redis设置缓存异常[%v]\n", err)
