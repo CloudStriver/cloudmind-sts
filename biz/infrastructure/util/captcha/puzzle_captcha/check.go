@@ -1,6 +1,8 @@
 package captcha
 
-import "errors"
+import (
+	"errors"
+)
 
 const slipOffset = 5.0
 

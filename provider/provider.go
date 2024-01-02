@@ -3,7 +3,7 @@ package provider
 import (
 	"github.com/CloudStriver/cloudmind-sts/biz/application/service"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
-	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/mapper/auth"
+	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/mapper/user"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/stores/redis"
 	"github.com/google/wire"
 )
@@ -24,5 +24,5 @@ var InfrastructureSet = wire.NewSet(
 )
 
 var MapperSet = wire.NewSet(
-	auth.NewMongoMapper,
+	user.NewMongoMapper,
 )

@@ -33,6 +33,7 @@ func loadImages(basePath string) ([][]byte, error) {
 		if f.IsDir() {
 			continue
 		}
+
 		if strings.HasSuffix(f.Name(), ".png") {
 			buf, err := ioutil.ReadFile(path.Join(basePath, f.Name()))
 			if err != nil {

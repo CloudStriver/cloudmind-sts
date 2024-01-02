@@ -2,17 +2,25 @@ package captcha
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/zeromicro/go-zero/core/trace"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"image"
 	"image/color"
 	"image/png"
+	"time"
 )
 
 // 干扰图片
 const interferenceOptions = 1
 
-func Run() (*CutoutRet, error) {
+func Run(ctx context.Context) (*CutoutRet, error) {
+	ctx, span := trace.TracerFromContext(ctx).Start(ctx, "captcha/Run", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
+	defer func() {
+		span.End(oteltrace.WithTimestamp(time.Now()))
+	}()
 	bgImage, err := randBackgroudImage()
 	if err != nil {
 		return nil, err

@@ -12,6 +12,10 @@ type StsServerImpl struct {
 	AuthService service.AuthService
 }
 
+func (s *StsServerImpl) AppendAuth(ctx context.Context, req *sts.AppendAuthReq) (resp *sts.AppendAuthResp, err error) {
+	return s.AuthService.AppendAuth(ctx, req)
+}
+
 func (s *StsServerImpl) Login(ctx context.Context, req *sts.LoginReq) (resp *sts.LoginResp, err error) {
 	return s.AuthService.Login(ctx, req)
 }
