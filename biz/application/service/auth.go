@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/consts"
@@ -15,6 +14,7 @@ import (
 	"github.com/CloudStriver/go-pkg/utils/uuid"
 	gensts "github.com/CloudStriver/service-idl-gen-go/kitex_gen/cloudmind/sts"
 	"github.com/google/wire"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 )
 
@@ -61,6 +61,9 @@ func (s *AuthServiceImpl) Login(ctx context.Context, req *gensts.LoginReq) (resp
 	}
 
 	user, err := s.UserMongoMapper.FindOneByAuth(ctx, convertor.AuthToAuthMapper(req.Auth))
+	if errors.Is(err, consts.ErrNotFound) {
+		return resp, nil
+	}
 	if err != nil {
 		log.CtxError(ctx, "查询用户授权信息异常[%v]\n", err)
 		return resp, err
@@ -152,26 +155,16 @@ func (s *AuthServiceImpl) CreateAuth(ctx context.Context, req *gensts.CreateAuth
 		}
 	}
 
-	auth := convertor.AuthToAuthMapper(req.AuthInfo)
-	_, err = s.UserMongoMapper.FindOneByAuth(ctx, auth)
-	switch {
-	case errors.Is(err, consts.ErrNotFound):
-		resp.UserId, err = s.UserMongoMapper.Insert(ctx, &usermapper.User{
-			PassWord: req.UserInfo.GetPassword(),
-			Role:     int32(req.UserInfo.Role),
-			Auths:    []*usermapper.Auth{auth},
-		})
-		if err != nil {
-			log.CtxError(ctx, "插入用户授权信息异常[%v]\n", err)
-			return resp, err
-		}
-		return resp, nil
-	case err == nil:
-		return resp, consts.ErrHaveExist
-	default:
-		log.CtxError(ctx, "查询用户授权信息异常[%v]\n", err)
+	resp.UserId, err = s.UserMongoMapper.Insert(ctx, &usermapper.User{
+		PassWord: req.UserInfo.GetPassword(),
+		Role:     int32(req.UserInfo.Role),
+		Auths:    []*usermapper.Auth{convertor.AuthToAuthMapper(req.AuthInfo)},
+	})
+	if err != nil {
+		log.CtxError(ctx, "插入用户授权信息异常[%v]\n", err)
 		return resp, err
 	}
+	return resp, nil
 }
 
 func (s *AuthServiceImpl) CreateCaptcha(ctx context.Context, _ *gensts.CreateCaptchaReq) (resp *gensts.CreateCaptchaResp, err error) {
