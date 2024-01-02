@@ -10,7 +10,7 @@ import (
 	"github.com/CloudStriver/cloudmind-sts/biz/adaptor"
 	"github.com/CloudStriver/cloudmind-sts/biz/application/service"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
-	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/mapper/auth"
+	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/mapper/user"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/stores/redis"
 )
 
@@ -22,11 +22,11 @@ func NewStsServerImpl() (*adaptor.StsServerImpl, error) {
 		return nil, err
 	}
 	redisRedis := redis.NewRedis(configConfig)
-	authMongoMapper := auth.NewMongoMapper(configConfig)
+	userMongoMapper := user.NewMongoMapper(configConfig)
 	authServiceImpl := &service.AuthServiceImpl{
-		Config:         configConfig,
-		Redis:          redisRedis,
-		AuthMongMapper: authMongoMapper,
+		Config:          configConfig,
+		Redis:           redisRedis,
+		UserMongoMapper: userMongoMapper,
 	}
 	stsServerImpl := &adaptor.StsServerImpl{
 		Config:      configConfig,

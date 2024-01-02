@@ -1,14 +1,18 @@
 package email
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util"
+	"github.com/zeromicro/go-zero/core/trace"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"log"
 	"net"
 	"net/smtp"
 	"strings"
+	"time"
 )
 
 const (
@@ -16,7 +20,11 @@ const (
 	body        = "<body><div class=\"container\"><p>你好，</p><p>你此次重置密码的验证码如下，请在 5 分钟内输入验证码进行下一步操作。如非你本人操作，请忽略此邮件。</p><p><strong>验证码：</strong>{{.code}}</p></div></body><style>body{font-family:Arial,sans-serif;background-color:#f0f0f0;margin:0;padding:0;}.container{max-width:600px;margin:0 auto;padding:20px;background-color:#ffffff;border-radius:5px;box-shadow:0 0 10px rgba(0,0,0,.1);}p{font-size:16px;line-height:1.6;color:#333333;}strong{font-weight:bold;}</style>\n"
 )
 
-func SendEmail(EmailConf config.EmailConf, toEmail, subject string) (string, error) {
+func SendEmail(ctx context.Context, EmailConf config.EmailConf, toEmail, subject string) (string, error) {
+	ctx, span := trace.TracerFromContext(ctx).Start(ctx, "auth/SendEmail", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
+	defer func() {
+		span.End(oteltrace.WithTimestamp(time.Now()))
+	}()
 	header := make(map[string]string)
 	header["From"] = "CloudMind " + "<" + EmailConf.Email + ">"
 	header["To"] = toEmail
