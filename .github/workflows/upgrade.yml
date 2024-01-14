@@ -77,8 +77,9 @@ jobs:
 
       - name: Deploy
         run: |
+          echo $HOME
           mkdir $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+          echo "${{ vars.KUBE_CONFIG }}" > $HOME/.kube/config
           kubectl get deployment ${{ env.IMAGE_NAME }} -n ${{ vars.BASE_TEST_NAMESPACE }} -o yaml |\
           sed 's/^\(      - image: cloudmind\/${{ env.IMAGE_NAME }}:\).*$/\1${{ needs.build.outputs.version }}/' |\
           kubectl apply -f -
