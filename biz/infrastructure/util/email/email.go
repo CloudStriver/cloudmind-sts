@@ -21,7 +21,7 @@ const (
 )
 
 func SendEmail(ctx context.Context, EmailConf config.EmailConf, toEmail, subject string) (string, error) {
-	ctx, span := trace.TracerFromContext(ctx).Start(ctx, "auth/SendEmail", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
+	_, span := trace.TracerFromContext(ctx).Start(ctx, "auth/SendEmail", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
 	defer func() {
 		span.End(oteltrace.WithTimestamp(time.Now()))
 	}()

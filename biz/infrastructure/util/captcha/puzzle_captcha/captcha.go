@@ -17,7 +17,7 @@ import (
 const interferenceOptions = 1
 
 func Run(ctx context.Context) (*CutoutRet, error) {
-	ctx, span := trace.TracerFromContext(ctx).Start(ctx, "captcha/Run", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
+	_, span := trace.TracerFromContext(ctx).Start(ctx, "captcha/Run", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
 	defer func() {
 		span.End(oteltrace.WithTimestamp(time.Now()))
 	}()

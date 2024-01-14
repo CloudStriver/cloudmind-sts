@@ -3,12 +3,11 @@ module github.com/CloudStriver/cloudmind-sts
 go 1.20
 
 require (
-	github.com/CloudStriver/go-pkg v0.0.0-20231226132958-6fbd9aae788e
-	github.com/CloudStriver/service-idl-gen-go v0.0.0-20231227131904-e146acf60e9d
+	github.com/CloudStriver/go-pkg v0.0.0-20240114145206-6c35e12ed362
+	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240102102004-0a94d07773bf
 	github.com/cloudwego/kitex v0.8.0
 	github.com/google/wire v0.5.0
 	github.com/kitex-contrib/obs-opentelemetry v0.2.5
-	github.com/kitex-contrib/registry-etcd v0.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/zeromicro/go-zero v1.6.1
 	go.mongodb.org/mongo-driver v1.13.1
@@ -16,10 +15,6 @@ require (
 	google.golang.org/grpc v1.60.1
 )
 
-replace (
-	github.com/CloudStriver/go-pkg => ../go-pkg
-	github.com/CloudStriver/service-idl-gen-go => ../service-idl-gen-go
-)
 
 require (
 	github.com/apache/thrift v0.16.0 // indirect
