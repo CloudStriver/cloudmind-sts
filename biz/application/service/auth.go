@@ -154,11 +154,20 @@ func (s *AuthServiceImpl) CreateAuth(ctx context.Context, req *gensts.CreateAuth
 			return resp, err
 		}
 	}
-
+	auth := convertor.AuthToAuthMapper(req.AuthInfo)
+	_, err = s.UserMongoMapper.FindOneByAuth(ctx, auth)
+	switch {
+	case err == nil:
+		return resp, consts.ErrHaveExist
+	case errors.Is(err, consts.ErrNotFound):
+		break
+	default:
+		return resp, err
+	}
 	resp.UserId, err = s.UserMongoMapper.Insert(ctx, &usermapper.User{
 		PassWord: req.UserInfo.GetPassword(),
 		Role:     int32(req.UserInfo.Role),
-		Auths:    []*usermapper.Auth{convertor.AuthToAuthMapper(req.AuthInfo)},
+		Auths:    []*usermapper.Auth{auth},
 	})
 	if err != nil {
 		log.CtxError(ctx, "插入用户授权信息异常[%v]\n", err)

@@ -15,6 +15,12 @@ gioui.org v0.0.0-20210308172011-57750fc8a0a6/go.mod h1:RSH6KIUZ0p2xy5zHDxgAM4zum
 git.sr.ht/~sbinet/gg v0.3.1/go.mod h1:KGYtlADtqsqANL9ueOFkWymvzUvLMQllU5Ixo+8v3pc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
+github.com/CloudStriver/go-pkg v0.0.0-20240101084050-e5fcface9afc h1:djrE2kATtcZaWgR7yRwkYaQ0m5lq8WvnwCpy3NM0Nw8=
+github.com/CloudStriver/go-pkg v0.0.0-20240101084050-e5fcface9afc/go.mod h1:YiA6K1UfOe6dvwnWlWKY7eAmYknmM/3LjkGQN2yqjGI=
+github.com/CloudStriver/go-pkg v0.0.0-20240114145206-6c35e12ed362 h1:phEgi4R337N2KeTqwp2wO/mbWeL8dlWbTPbtWLTJ3zc=
+github.com/CloudStriver/go-pkg v0.0.0-20240114145206-6c35e12ed362/go.mod h1:547GMZ3ct2S2Lo40SoK//2HXR0Z6rgFiQL4XfzPZ1Bk=
+github.com/CloudStriver/service-idl-gen-go v0.0.0-20240102102004-0a94d07773bf h1:qPSHaUNT6Pa/Mntvb1y0GPaJVGjtOUtOJfLINM+8euU=
+github.com/CloudStriver/service-idl-gen-go v0.0.0-20240102102004-0a94d07773bf/go.mod h1:chtR82RvfrjUujTGWROSCNAwF9Lh/U959k34bXIDvBI=
 github.com/HdrHistogram/hdrhistogram-go v1.1.2/go.mod h1:yDgFjdqOqDEKOvasDdhWNXYg9BVp4O+o5f6V/ehm6Oo=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/ajstarks/deck v0.0.0-20200831202436-30c9fc6549a9/go.mod h1:JynElWSGnm/4RlzPXRlREEwqTHAN3T56Bv2ITsFT3gY=
