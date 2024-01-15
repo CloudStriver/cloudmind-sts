@@ -82,6 +82,6 @@ jobs:
           mkdir .kube
           echo "${{ vars.KUBE_CONFIG }}" > .kube/config
           kubectl get nodes
-          kubectl get deployment ${{ env.IMAGE_NAME }} -n ${{ vars.BASE_TEST_NAMESPACE }} -o yaml |\
-          sed 's/^\(      - image: lansongxx\/${{ env.IMAGE_NAME }}:\).*$/\1${{ needs.build.outputs.version }}/' |\
-          kubectl apply -f -
+          # kubectl get deployment ${{ env.IMAGE_NAME }} -n ${{ vars.BASE_TEST_NAMESPACE }} -o yaml |\
+          # sed 's/^\(      - image: lansongxx\/${{ env.IMAGE_NAME }}:\).*$/\1${{ needs.build.outputs.version }}/' |\
+          # kubectl apply -f -
