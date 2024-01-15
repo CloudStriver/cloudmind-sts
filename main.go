@@ -1,7 +1,6 @@
 package main
 
 import (
-	captcha "github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/captcha/puzzle_captcha"
 	"github.com/CloudStriver/cloudmind-sts/provider"
 	"github.com/CloudStriver/go-pkg/utils/kitex/middleware"
 	"github.com/CloudStriver/go-pkg/utils/util/log"
@@ -14,7 +13,6 @@ import (
 )
 
 func main() {
-	initCaptcha()
 	klog.SetLogger(log.NewKlogLogger())
 	s, err := provider.NewStsServerImpl()
 	if err != nil {
@@ -37,13 +35,4 @@ func main() {
 	if err != nil {
 		log.Error(err.Error())
 	}
-}
-func initCaptcha() {
-	if err := captcha.LoadBackgroudImages("./biz/infrastructure/util/captcha/images/puzzle_captcha/backgroud"); err != nil {
-		panic(err)
-	}
-	if err := captcha.LoadBlockImages("./biz/infrastructure/util/captcha/images/puzzle_captcha/block"); err != nil {
-		panic(err)
-	}
-
 }

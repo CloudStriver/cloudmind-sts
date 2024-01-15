@@ -7,11 +7,8 @@ import (
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/consts"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/convertor"
 	usermapper "github.com/CloudStriver/cloudmind-sts/biz/infrastructure/mapper/user"
-	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/captcha/puzzle_captcha"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/email"
-	"github.com/CloudStriver/go-pkg/utils/pconvertor"
 	"github.com/CloudStriver/go-pkg/utils/util/log"
-	"github.com/CloudStriver/go-pkg/utils/uuid"
 	gensts "github.com/CloudStriver/service-idl-gen-go/kitex_gen/cloudmind/sts"
 	"github.com/google/wire"
 	"github.com/pkg/errors"
@@ -19,8 +16,6 @@ import (
 )
 
 type AuthService interface {
-	CreateCaptcha(ctx context.Context, _ *gensts.CreateCaptchaReq) (resp *gensts.CreateCaptchaResp, err error)
-	CheckCaptcha(ctx context.Context, _ *gensts.CheckCaptchaReq) (resp *gensts.CheckCaptchaResp, err error)
 	CreateAuth(ctx context.Context, req *gensts.CreateAuthReq) (resp *gensts.CreateAuthResp, err error)
 	CheckEmail(ctx context.Context, req *gensts.CheckEmailReq) (resp *gensts.CheckEmailResp, err error)
 	SetPassword(ctx context.Context, req *gensts.SetPasswordReq) (resp *gensts.SetPasswordResp, err error)
@@ -51,15 +46,6 @@ func (s *AuthServiceImpl) AppendAuth(ctx context.Context, req *gensts.AppendAuth
 
 func (s *AuthServiceImpl) Login(ctx context.Context, req *gensts.LoginReq) (resp *gensts.LoginResp, err error) {
 	resp = new(gensts.LoginResp)
-	if req.Auth.AuthType == gensts.AuthType_email {
-		if _, err = s.CheckCaptcha(ctx, &gensts.CheckCaptchaReq{
-			Point: &gensts.Point{X: req.Captcha.Point.X, Y: req.Captcha.Point.Y},
-			Key:   req.Captcha.Key,
-		}); err != nil {
-			return resp, err
-		}
-	}
-
 	user, err := s.UserMongoMapper.FindOneByAuth(ctx, convertor.AuthToAuthMapper(req.Auth))
 	if errors.Is(err, consts.ErrNotFound) {
 		return resp, nil
@@ -137,7 +123,6 @@ func (s *AuthServiceImpl) SendEmail(ctx context.Context, req *gensts.SendEmailRe
 		return resp, err
 	}
 	if err = s.Redis.SetexCtx(ctx, fmt.Sprintf("%s:%s", consts.EmailCode, req.Email), code, 300); err != nil {
-		log.CtxError(ctx, "Redis设置缓存异常[%v]\n", err)
 		return resp, err
 	}
 	return resp, nil
@@ -172,45 +157,6 @@ func (s *AuthServiceImpl) CreateAuth(ctx context.Context, req *gensts.CreateAuth
 	if err != nil {
 		log.CtxError(ctx, "插入用户授权信息异常[%v]\n", err)
 		return resp, err
-	}
-	return resp, nil
-}
-
-func (s *AuthServiceImpl) CreateCaptcha(ctx context.Context, _ *gensts.CreateCaptchaReq) (resp *gensts.CreateCaptchaResp, err error) {
-	resp = new(gensts.CreateCaptchaResp)
-
-	ret, err := captcha.Run(ctx)
-	if err != nil {
-		log.CtxError(ctx, "验证码生成异常[%v]\n", err)
-		return resp, err
-	}
-
-	resp.Key = uuid.NewUuid(ctx)
-	resp.OriginalImageBase64 = ret.BackgroudImg
-	resp.JigsawImageBase64 = ret.BlockImg
-	if err = s.Redis.SetexCtx(ctx, fmt.Sprintf("%s:%s", consts.CaptchaKey, resp.Key), pconvertor.StructToJsonString(ctx, &captcha.Point{X: ret.Point.X, Y: ret.Point.Y}), 120); err != nil {
-		log.CtxError(ctx, "Redis设置缓存异常[%v]\n", err)
-		return resp, err
-	}
-
-	return resp, nil
-}
-
-func (s *AuthServiceImpl) CheckCaptcha(ctx context.Context, req *gensts.CheckCaptchaReq) (resp *gensts.CheckCaptchaResp, err error) {
-	resp = new(gensts.CheckCaptchaResp)
-	value, err := s.Redis.GetCtx(ctx, fmt.Sprintf("%s:%s", consts.CaptchaKey, req.Key))
-	if err != nil {
-		log.CtxError(ctx, "Redis获取缓存异常[%v]\n", err)
-		return resp, err
-	}
-	if value == "" {
-		return resp, consts.ErrCodeNotFound
-	}
-	c := &captcha.Point{}
-	pconvertor.JsonStringToStruct(ctx, c, []byte(value))
-
-	if err = captcha.Check(&captcha.Point{X: int(req.Point.X), Y: int(req.Point.Y)}, c); err != nil {
-		return resp, consts.ErrCodeNotEqual
 	}
 	return resp, nil
 }
