@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util"
+	"github.com/CloudStriver/go-pkg/utils/pconvertor"
 	"github.com/zeromicro/go-zero/core/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"log"
@@ -36,7 +37,7 @@ func SendEmail(ctx context.Context, EmailConf config.EmailConf, toEmail, subject
 
 	auth := smtp.PlainAuth("", EmailConf.Email, EmailConf.Password, EmailConf.Host)
 
-	return Code, SendMailWithTLS(fmt.Sprintf("%s:%d", EmailConf.Host, EmailConf.Port), auth, EmailConf.Email, []string{toEmail}, []byte(message))
+	return Code, SendMailWithTLS(fmt.Sprintf("%s:%d", EmailConf.Host, EmailConf.Port), auth, EmailConf.Email, []string{toEmail}, pconvertor.String2Bytes(message))
 }
 
 func buildMessage(header map[string]string, body string) string {

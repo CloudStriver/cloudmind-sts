@@ -3,7 +3,7 @@ module github.com/CloudStriver/cloudmind-sts
 go 1.20
 
 require (
-	github.com/CloudStriver/go-pkg v0.0.0-20240114145206-6c35e12ed362
+	github.com/CloudStriver/go-pkg v0.0.0-20240115102515-f1d7bfa047af
 	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240115022159-dd3577d2191f
 	github.com/cloudwego/kitex v0.8.0
 	github.com/google/wire v0.5.0
@@ -48,6 +48,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/jhump/protoreflect v1.15.4 // indirect
+	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
