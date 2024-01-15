@@ -20,10 +20,6 @@ func (s *StsServerImpl) Login(ctx context.Context, req *sts.LoginReq) (resp *sts
 	return s.AuthService.Login(ctx, req)
 }
 
-func (s *StsServerImpl) CheckCaptcha(ctx context.Context, req *sts.CheckCaptchaReq) (res *sts.CheckCaptchaResp, err error) {
-	return s.AuthService.CheckCaptcha(ctx, req)
-}
-
 func (s *StsServerImpl) SetPassword(ctx context.Context, req *sts.SetPasswordReq) (res *sts.SetPasswordResp, err error) {
 	return s.AuthService.SetPassword(ctx, req)
 }
@@ -38,8 +34,4 @@ func (s *StsServerImpl) CheckEmail(ctx context.Context, req *sts.CheckEmailReq) 
 
 func (s *StsServerImpl) CreateAuth(ctx context.Context, req *sts.CreateAuthReq) (res *sts.CreateAuthResp, err error) {
 	return s.AuthService.CreateAuth(ctx, req)
-}
-
-func (s *StsServerImpl) CreateCaptcha(ctx context.Context, req *sts.CreateCaptchaReq) (res *sts.CreateCaptchaResp, err error) {
-	return s.AuthService.CreateCaptcha(ctx, req)
 }
