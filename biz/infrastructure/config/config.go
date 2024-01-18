@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/core/stores/cache"
@@ -15,6 +16,22 @@ type EmailConf struct {
 	Email    string
 }
 
+type CosConfig struct {
+	AppId      string
+	BucketName string
+	Region     string
+	SecretId   string
+	SecretKey  string
+}
+
+func (c *CosConfig) CosHost() string {
+	return fmt.Sprintf("https://%s.cos.%s.myqcloud.com", c.BucketName, c.Region)
+}
+
+func (c *CosConfig) CIHost() string {
+	return fmt.Sprintf("https://%s.ci.%s.myqcloud.com", c.BucketName, c.Region)
+}
+
 type Config struct {
 	service.ServiceConf
 	ListenOn string
@@ -25,6 +42,7 @@ type Config struct {
 	CacheConf cache.CacheConf
 	Redis     *redis.RedisConf
 	EmailConf EmailConf
+	CosConfig *CosConfig
 }
 
 func NewConfig() (*Config, error) {

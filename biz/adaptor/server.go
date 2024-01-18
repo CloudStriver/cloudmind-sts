@@ -10,6 +10,19 @@ import (
 type StsServerImpl struct {
 	*config.Config
 	AuthService service.AuthService
+	CosService  service.CosService
+}
+
+func (s *StsServerImpl) GenCosSts(ctx context.Context, req *sts.GenCosStsReq) (res *sts.GenCosStsResp, err error) {
+	return s.CosService.GenCosSts(ctx, req)
+}
+
+func (s *StsServerImpl) GenSignedUrl(ctx context.Context, req *sts.GenSignedUrlReq) (res *sts.GenSignedUrlResp, err error) {
+	return s.CosService.GenSignedUrl(ctx, req)
+}
+
+func (s *StsServerImpl) DeleteObject(ctx context.Context, req *sts.DeleteObjectReq) (res *sts.DeleteObjectResp, err error) {
+	return s.CosService.DeleteObject(ctx, req)
 }
 
 func (s *StsServerImpl) AppendAuth(ctx context.Context, req *sts.AppendAuthReq) (resp *sts.AppendAuthResp, err error) {
