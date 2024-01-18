@@ -18,11 +18,11 @@ import (
 
 const (
 	contentType = "text/html; charset=UTF-8"
-	body        = "<body><div class=\"container\"><p>你好，</p><p>你此次重置密码的验证码如下，请在 5 分钟内输入验证码进行下一步操作。如非你本人操作，请忽略此邮件。</p><p><strong>验证码：</strong>{{.code}}</p></div></body><style>body{font-family:Arial,sans-serif;background-color:#f0f0f0;margin:0;padding:0;}.container{max-width:600px;margin:0 auto;padding:20px;background-color:#ffffff;border-radius:5px;box-shadow:0 0 10px rgba(0,0,0,.1);}p{font-size:16px;line-height:1.6;color:#333333;}strong{font-weight:bold;}</style>\n"
+	body        = "<body><div class=\"container\"><p>你好，</p><p>你此次{{.subject}}的验证码如下，请在 5 分钟内输入验证码进行下一步操作。如非你本人操作，请忽略此邮件。</p><p><strong>验证码：</strong>{{.code}}</p></div></body><style>body{font-family:Arial,sans-serif;background-color:#f0f0f0;margin:0;padding:0;}.container{max-width:600px;margin:0 auto;padding:20px;background-color:#ffffff;border-radius:5px;box-shadow:0 0 10px rgba(0,0,0,.1);}p{font-size:16px;line-height:1.6;color:#333333;}strong{font-weight:bold;}</style>\n"
 )
 
 func SendEmail(ctx context.Context, EmailConf config.EmailConf, toEmail, subject string) (string, error) {
-	_, span := trace.TracerFromContext(ctx).Start(ctx, "auth/SendEmail", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
+	_, span := trace.TracerFromContext(ctx).Start(ctx, "auth.SendEmail", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
 	defer func() {
 		span.End(oteltrace.WithTimestamp(time.Now()))
 	}()
@@ -33,10 +33,8 @@ func SendEmail(ctx context.Context, EmailConf config.EmailConf, toEmail, subject
 	header["Content-Type"] = contentType
 
 	Code := util.GenerateCode()
-	message := buildMessage(header, strings.Replace(body, "{{.code}}", Code, 1))
-
+	message := buildMessage(header, strings.Replace(strings.Replace(body, "{{.code}}", Code, 1), "{{.subject}}", subject, 1))
 	auth := smtp.PlainAuth("", EmailConf.Email, EmailConf.Password, EmailConf.Host)
-
 	return Code, SendMailWithTLS(fmt.Sprintf("%s:%d", EmailConf.Host, EmailConf.Port), auth, EmailConf.Email, []string{toEmail}, pconvertor.String2Bytes(message))
 }
 
