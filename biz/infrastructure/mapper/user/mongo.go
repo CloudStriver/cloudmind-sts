@@ -13,14 +13,14 @@ import (
 	"time"
 )
 
-const CollectionName = "User"
+const CollectionName = "user"
 
-var PrefixUserCacheKey = "cache:User:"
+var PrefixUserCacheKey = "cache:user:"
 
-var _ UserMongoMapper = (*MongoMapper)(nil)
+var _ IUserMongoMapper = (*MongoMapper)(nil)
 
 type (
-	UserMongoMapper interface {
+	IUserMongoMapper interface {
 		Insert(ctx context.Context, data *User) (string, error)                             // 插入
 		FindOne(ctx context.Context, id string) (*User, error)                              // 查找
 		Update(ctx context.Context, data *User) (*mongo.UpdateResult, error)                // 修改
@@ -61,14 +61,13 @@ func (m *MongoMapper) AppendAuth(ctx context.Context, id string, auth *Auth) err
 	return nil
 }
 
-func NewMongoMapper(config *config.Config) UserMongoMapper {
+func NewMongoMapper(config *config.Config) IUserMongoMapper {
 	conn := monc.MustNewModel(config.Mongo.URL, config.Mongo.DB, CollectionName, config.CacheConf)
 	return &MongoMapper{
 		conn: conn,
 	}
 }
 
-// 通过id修改某个auth
 func (m *MongoMapper) UpdateById(ctx context.Context, auth *Auth, id string) (*mongo.UpdateResult, error) {
 	ID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
