@@ -32,7 +32,7 @@ var AuthSet = wire.NewSet(
 type AuthServiceImpl struct {
 	Config          *config.Config
 	Redis           *redis.Redis
-	UserMongoMapper usermapper.UserMongoMapper
+	UserMongoMapper usermapper.IUserMongoMapper
 }
 
 func (s *AuthServiceImpl) AppendAuth(ctx context.Context, req *gensts.AppendAuthReq) (resp *gensts.AppendAuthResp, err error) {
