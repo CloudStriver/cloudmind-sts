@@ -8,7 +8,6 @@ import (
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/convertor"
 	usermapper "github.com/CloudStriver/cloudmind-sts/biz/infrastructure/mapper/user"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/email"
-	"github.com/CloudStriver/go-pkg/utils/util/log"
 	gensts "github.com/CloudStriver/service-idl-gen-go/kitex_gen/cloudmind/sts"
 	"github.com/google/wire"
 	"github.com/pkg/errors"
@@ -38,7 +37,6 @@ type AuthServiceImpl struct {
 func (s *AuthServiceImpl) AppendAuth(ctx context.Context, req *gensts.AppendAuthReq) (resp *gensts.AppendAuthResp, err error) {
 	resp = new(gensts.AppendAuthResp)
 	if err = s.UserMongoMapper.AppendAuth(ctx, req.UserId, convertor.AuthToAuthMapper(req.AuthInfo)); err != nil {
-		log.CtxError(ctx, "追加授权信息异常[%v]\n", err)
 		return resp, err
 	}
 	return resp, nil
@@ -51,7 +49,6 @@ func (s *AuthServiceImpl) Login(ctx context.Context, req *gensts.LoginReq) (resp
 		return resp, nil
 	}
 	if err != nil {
-		log.CtxError(ctx, "查询用户授权信息异常[%v]\n", err)
 		return resp, err
 	}
 
@@ -67,15 +64,16 @@ func (s *AuthServiceImpl) CheckEmail(ctx context.Context, req *gensts.CheckEmail
 	resp = new(gensts.CheckEmailResp)
 	code, err := s.Redis.GetCtx(ctx, fmt.Sprintf("%s:%s", consts.EmailCode, req.Email))
 	if err != nil {
-		log.CtxError(ctx, "Redis获取缓存异常[%v]\n", err)
 		return resp, err
 	}
 
 	if code != "" && code == req.Code {
-		return resp, nil
+		if err = s.Redis.SetexCtx(ctx, fmt.Sprintf("%s:%s", consts.PassCheckEmail, req.Email), "true", 300); err != nil {
+			return resp, err
+		}
+		resp.Ok = true
 	}
-
-	return resp, consts.ErrCodeNotEqual
+	return resp, nil
 }
 
 func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswordReq) (resp *gensts.SetPasswordResp, err error) {
@@ -83,24 +81,25 @@ func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswo
 	var user *usermapper.User
 	switch o := req.Key.(type) {
 	case *gensts.SetPasswordReq_EmailOptions:
-		if _, err = s.CheckEmail(ctx, &gensts.CheckEmailReq{Email: o.EmailOptions.Email, Code: o.EmailOptions.Code}); err != nil {
+		value := ""
+		if value, err = s.Redis.GetCtx(ctx, fmt.Sprintf("%s:%s", consts.PassCheckEmail, req.Password)); err != nil {
 			return resp, err
+		}
+		if value != "true" {
+			return resp, consts.ErrNotPassEmailCheck
 		}
 
 		user, err = s.UserMongoMapper.FindOneByAuth(ctx, &usermapper.Auth{Type: int32(gensts.AuthType_email), AppId: o.EmailOptions.Email})
 		if err != nil {
-			log.CtxError(ctx, "查找授权信息异常[%v]\n", err)
 			return resp, err
 		}
 		_, err = s.UserMongoMapper.Update(ctx, &usermapper.User{ID: user.ID, PassWord: req.Password})
 		if err != nil {
-			log.CtxError(ctx, "修改用户授权信息异常[%v]\n", err)
 			return resp, err
 		}
 	case *gensts.SetPasswordReq_UserIdOptions:
 		user, err = s.UserMongoMapper.FindOne(ctx, o.UserIdOptions.UserId)
 		if err != nil {
-			log.CtxError(ctx, "查找用户信息异常[%v]\n", err)
 			return resp, err
 		}
 		if user.PassWord != o.UserIdOptions.Password {
@@ -108,7 +107,6 @@ func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswo
 		}
 
 		if _, err = s.UserMongoMapper.Update(ctx, &usermapper.User{ID: user.ID, PassWord: req.Password}); err != nil {
-			log.CtxError(ctx, "修改用户授权信息异常[%v]\n", err)
 			return resp, err
 		}
 	}
@@ -119,7 +117,6 @@ func (s *AuthServiceImpl) SendEmail(ctx context.Context, req *gensts.SendEmailRe
 	resp = new(gensts.SendEmailResp)
 	code, err := email.SendEmail(ctx, s.Config.EmailConf, req.Email, req.Subject)
 	if err != nil {
-		log.CtxError(ctx, "发送邮件异常[%v]\n", err)
 		return resp, err
 	}
 	if err = s.Redis.SetexCtx(ctx, fmt.Sprintf("%s:%s", consts.EmailCode, req.Email), code, 300); err != nil {
@@ -130,15 +127,6 @@ func (s *AuthServiceImpl) SendEmail(ctx context.Context, req *gensts.SendEmailRe
 
 func (s *AuthServiceImpl) CreateAuth(ctx context.Context, req *gensts.CreateAuthReq) (resp *gensts.CreateAuthResp, err error) {
 	resp = new(gensts.CreateAuthResp)
-	if req.AuthInfo.AuthType == gensts.AuthType_email {
-		_, err = s.CheckEmail(ctx, &gensts.CheckEmailReq{
-			Email: req.AuthInfo.AppId,
-			Code:  req.GetCode(),
-		})
-		if err != nil {
-			return resp, err
-		}
-	}
 	auth := convertor.AuthToAuthMapper(req.AuthInfo)
 	_, err = s.UserMongoMapper.FindOneByAuth(ctx, auth)
 	switch {
@@ -155,7 +143,6 @@ func (s *AuthServiceImpl) CreateAuth(ctx context.Context, req *gensts.CreateAuth
 		Auths:    []*usermapper.Auth{auth},
 	})
 	if err != nil {
-		log.CtxError(ctx, "插入用户授权信息异常[%v]\n", err)
 		return resp, err
 	}
 	return resp, nil

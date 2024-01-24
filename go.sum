@@ -6,10 +6,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/CloudStriver/go-pkg v0.0.0-20240115102515-f1d7bfa047af h1:tl3MgdfL4fOkZxFYqqLXYr6dEk5TvT/hGe06uoB+spY=
 github.com/CloudStriver/go-pkg v0.0.0-20240115102515-f1d7bfa047af/go.mod h1:RMjN80WnoDiqHZIsv27u9BxJ9axldr+elFRHgSjhXnY=
-github.com/CloudStriver/service-idl-gen-go v0.0.0-20240117112200-35e688c4a25f h1:OMxZGdZgHmalGpSmWz/ZVCJXUCbpnQ+GX9t11ChRGWY=
-github.com/CloudStriver/service-idl-gen-go v0.0.0-20240117112200-35e688c4a25f/go.mod h1:chtR82RvfrjUujTGWROSCNAwF9Lh/U959k34bXIDvBI=
-github.com/CloudStriver/service-idl-gen-go v0.0.0-20240117150051-ecfa6300e8c4 h1:0WvZvaLBCLPMBVdB3s9WAp9tYR2sBAGfSfFkmcbE3sc=
-github.com/CloudStriver/service-idl-gen-go v0.0.0-20240117150051-ecfa6300e8c4/go.mod h1:chtR82RvfrjUujTGWROSCNAwF9Lh/U959k34bXIDvBI=
+github.com/CloudStriver/service-idl-gen-go v0.0.0-20240124091147-b9f3b0ea9d4b h1:3QmklzpLCqO3B6enVQEo4QVbSaMr2x/Skyw5aR4BgEs=
+github.com/CloudStriver/service-idl-gen-go v0.0.0-20240124091147-b9f3b0ea9d4b/go.mod h1:chtR82RvfrjUujTGWROSCNAwF9Lh/U959k34bXIDvBI=
 github.com/QcloudApi/qcloud_sign_golang v0.0.0-20141224014652-e4130a326409/go.mod h1:1pk82RBxDY/JZnPQrtqHlUFfCctgdorsd9M06fMynOM=
 github.com/ajstarks/deck v0.0.0-20200831202436-30c9fc6549a9/go.mod h1:JynElWSGnm/4RlzPXRlREEwqTHAN3T56Bv2ITsFT3gY=
 github.com/ajstarks/deck/generate v0.0.0-20210309230005-c3f852c02e19/go.mod h1:T13YZdzov6OU0A1+RfKZiZN9ca6VeKdBdyDV+BY97Tk=
