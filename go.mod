@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/CloudStriver/go-pkg v0.0.0-20240115102515-f1d7bfa047af
-	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240117150051-ecfa6300e8c4
+	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240124091147-b9f3b0ea9d4b
 	github.com/cloudwego/kitex v0.8.0
 	github.com/google/wire v0.5.0
 	github.com/kitex-contrib/obs-opentelemetry v0.2.5
