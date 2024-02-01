@@ -24,12 +24,16 @@ type CosConfig struct {
 	SecretKey  string
 }
 
-func (c *CosConfig) CosHost() string {
-	return fmt.Sprintf("https://%s.cos.%s.myqcloud.com", c.BucketName, c.Region)
+type CDNConfig struct {
+	Url    string
+	Key    string
+	Prefix string
+	MinTTL int
+	MaxTTL int
 }
 
-func (c *CosConfig) CIHost() string {
-	return fmt.Sprintf("https://%s.ci.%s.myqcloud.com", c.BucketName, c.Region)
+func (c *CosConfig) CosHost() string {
+	return fmt.Sprintf("https://%s.cos.%s.myqcloud.com", c.BucketName, c.Region)
 }
 
 type Config struct {
@@ -39,10 +43,12 @@ type Config struct {
 		URL string
 		DB  string
 	}
-	CacheConf cache.CacheConf
-	Redis     *redis.RedisConf
-	EmailConf EmailConf
-	CosConfig *CosConfig
+	CacheConf     cache.CacheConf
+	Redis         *redis.RedisConf
+	EmailConf     EmailConf
+	CosConfig     *CosConfig
+	FileCosConfig *CosConfig
+	CdnConfig     *CDNConfig
 }
 
 func NewConfig() (*Config, error) {
