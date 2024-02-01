@@ -2,10 +2,14 @@ package cos
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
 	"github.com/tencentyun/cos-go-sdk-v5"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/google/wire"
@@ -15,8 +19,11 @@ import (
 )
 
 type CosSDK struct {
-	stsClient *sts.Client
-	cosClient *cos.Client
+	stsClient     *sts.Client
+	cosClient     *cos.Client
+	fileStsClient *sts.Client
+	fileCosClient *cos.Client
+	CDNConf       *config.CDNConfig
 }
 
 func NewCosSDK(config *config.Config) (*CosSDK, error) {
@@ -24,7 +31,7 @@ func NewCosSDK(config *config.Config) (*CosSDK, error) {
 	if err != nil {
 		return nil, err
 	}
-	ciURL, err := url.Parse(config.CosConfig.CIHost())
+	fileBucketURL, err := url.Parse(config.FileCosConfig.CosHost())
 	if err != nil {
 		return nil, err
 	}
@@ -35,21 +42,55 @@ func NewCosSDK(config *config.Config) (*CosSDK, error) {
 			nil),
 		cosClient: cos.NewClient(&cos.BaseURL{
 			BucketURL: bucketURL,
-			CIURL:     ciURL,
 		}, &http.Client{
 			Transport: &cos.AuthorizationTransport{
 				SecretID:  config.CosConfig.SecretId,
 				SecretKey: config.CosConfig.SecretKey,
 			},
 		}),
+		fileStsClient: sts.NewClient(
+			config.FileCosConfig.SecretId,
+			config.FileCosConfig.SecretKey,
+			nil),
+		fileCosClient: cos.NewClient(&cos.BaseURL{
+			BucketURL: fileBucketURL,
+		}, &http.Client{
+			Transport: &cos.AuthorizationTransport{
+				SecretID:  config.FileCosConfig.SecretId,
+				SecretKey: config.FileCosConfig.SecretKey,
+			},
+		}),
+		CDNConf: config.CdnConfig,
 	}, nil
 }
-
-func (s *CosSDK) GetCredential(ctx context.Context, opt *sts.CredentialOptions) (*sts.CredentialResult, error) {
+func (s *CosSDK) GenerateURL(path string, ttl int) string {
+	if ttl < s.CDNConf.MinTTL {
+		ttl = s.CDNConf.MinTTL
+	} else if ttl > s.CDNConf.MaxTTL {
+		ttl = s.CDNConf.MaxTTL
+	}
+	url := s.CDNConf.Url
+	key := s.CDNConf.Key
+	now := time.Now().Add(-time.Duration(s.CDNConf.MaxTTL-ttl) * time.Second).Unix()
+	signKey := "sign"
+	timeKey := "t"
+	ttlFormat := 10
+	var requestURL string
+	tsFormat := strconv.FormatInt(now, ttlFormat)
+	sign := fmt.Sprintf("%s%s%s", key, path, tsFormat)
+	signMD5 := md5.Sum([]byte(sign))
+	signHex := hex.EncodeToString(signMD5[:])
+	requestURL = fmt.Sprintf("%s%s?%s=%s&%s=%s", url, path, signKey, signHex, timeKey, tsFormat)
+	return requestURL
+}
+func (s *CosSDK) GetCredential(ctx context.Context, opt *sts.CredentialOptions, isFile bool) (*sts.CredentialResult, error) {
 	_, span := trace.TracerFromContext(ctx).Start(ctx, "sts/GetCredential", oteltrace.WithTimestamp(time.Now()), oteltrace.WithSpanKind(oteltrace.SpanKindClient))
 	defer func() {
 		span.End(oteltrace.WithTimestamp(time.Now()))
 	}()
+	if isFile {
+		return s.fileStsClient.GetCredential(opt)
+	}
 	return s.stsClient.GetCredential(opt)
 }
 

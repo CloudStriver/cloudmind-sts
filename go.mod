@@ -4,11 +4,12 @@ go 1.20
 
 require (
 	github.com/CloudStriver/go-pkg v0.0.0-20240115102515-f1d7bfa047af
-	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240124091147-b9f3b0ea9d4b
+	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240201094804-9bf4d9eee7a9
 	github.com/cloudwego/kitex v0.8.0
 	github.com/google/wire v0.5.0
 	github.com/kitex-contrib/obs-opentelemetry v0.2.5
 	github.com/pkg/errors v0.9.1
+	github.com/samber/lo v1.39.0
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.45
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20231121073521-dd65d8941a16
 	github.com/xh-polaris/platform-sts v1.4.34
@@ -17,6 +18,8 @@ require (
 	go.opentelemetry.io/otel/trace v1.19.0
 	google.golang.org/grpc v1.60.1
 )
+
+//replace github.com/CloudStriver/service-idl-gen-go => ../service-idl-gen-go
 
 require (
 	github.com/apache/thrift v0.16.0 // indirect
@@ -97,6 +100,7 @@ require (
 	go.uber.org/automaxprocs v1.5.3 // indirect
 	golang.org/x/arch v0.2.0 // indirect
 	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect

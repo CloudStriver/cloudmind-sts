@@ -9,7 +9,6 @@ import (
 	"github.com/google/wire"
 	cossts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 	"github.com/xh-polaris/platform-sts/biz/infrastructure/consts"
-	"time"
 )
 
 type ICosService interface {
@@ -30,9 +29,12 @@ var CosSet = wire.NewSet(
 
 func (s *CosService) GenCosSts(ctx context.Context, req *gensts.GenCosStsReq) (*gensts.GenCosStsResp, error) {
 	cosConfig := s.Config.CosConfig
+	if req.IsFile {
+		cosConfig = s.Config.FileCosConfig
+	}
 	stsOption := &cossts.CredentialOptions{
 		// 临时密钥有效时长，单位是秒
-		DurationSeconds: int64(10 * time.Minute.Seconds()),
+		DurationSeconds: req.Time,
 		Region:          cosConfig.Region,
 		Policy: &cossts.CredentialPolicy{
 			Statement: []cossts.CredentialPolicyStatement{
@@ -48,6 +50,7 @@ func (s *CosService) GenCosSts(ctx context.Context, req *gensts.GenCosStsReq) (*
 						"name/cos:ListParts",
 						"name/cos:UploadPart",
 						"name/cos:CompleteMultipartUpload",
+						"name/cos:GetObject",
 					},
 					Effect: "allow",
 					// 密钥可控制的资源列表。此处开放名字为用户ID的文件夹及其子文件夹
@@ -60,7 +63,7 @@ func (s *CosService) GenCosSts(ctx context.Context, req *gensts.GenCosStsReq) (*
 		},
 	}
 
-	res, err := s.CosSDK.GetCredential(ctx, stsOption)
+	res, err := s.CosSDK.GetCredential(ctx, stsOption, req.IsFile)
 	if err != nil {
 		return nil, err
 	}
@@ -74,18 +77,17 @@ func (s *CosService) GenCosSts(ctx context.Context, req *gensts.GenCosStsReq) (*
 	}, nil
 }
 
-func (s *CosService) GenSignedUrl(ctx context.Context, req *gensts.GenSignedUrlReq) (*gensts.GenSignedUrlResp, error) {
-	signedUrl, err := s.CosSDK.GetPresignedURL(ctx, req.Method, req.Path, req.SecretId, req.SecretKey, time.Minute, nil)
-	if err != nil {
-		return nil, err
-	}
-	return &gensts.GenSignedUrlResp{SignedUrl: signedUrl.String()}, nil
+func (s *CosService) GenSignedUrl(ctx context.Context, req *gensts.GenSignedUrlReq) (resp *gensts.GenSignedUrlResp, err error) {
+	resp = new(gensts.GenSignedUrlResp)
+	resp.SignedUrl = s.CosSDK.GenerateURL(s.CosSDK.CDNConf.Prefix+req.Path, int(req.Ttl))
+	return resp, nil
 }
 
-func (s *CosService) DeleteObject(ctx context.Context, req *gensts.DeleteObjectReq) (*gensts.DeleteObjectResp, error) {
+func (s *CosService) DeleteObject(ctx context.Context, req *gensts.DeleteObjectReq) (resp *gensts.DeleteObjectResp, err error) {
+	resp = new(gensts.DeleteObjectResp)
 	res, err := s.CosSDK.Delete(ctx, req.Path)
 	if err != nil || res.StatusCode != 200 {
-		return nil, consts.ErrCannotDeleteObject
+		return resp, consts.ErrCannotDeleteObject
 	}
-	return &gensts.DeleteObjectResp{}, nil
+	return resp, nil
 }
