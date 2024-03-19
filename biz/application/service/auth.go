@@ -82,7 +82,7 @@ func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswo
 	switch o := req.Key.(type) {
 	case *gensts.SetPasswordReq_EmailOptions:
 		value := ""
-		if value, err = s.Redis.GetCtx(ctx, fmt.Sprintf("%s:%s", consts.PassCheckEmail, req.Password)); err != nil {
+		if value, err = s.Redis.GetCtx(ctx, fmt.Sprintf("%s:%s", consts.PassCheckEmail, o.EmailOptions.Email)); err != nil {
 			return resp, err
 		}
 		if value != "true" {
@@ -97,6 +97,11 @@ func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswo
 		if err != nil {
 			return resp, err
 		}
+
+		if _, err = s.Redis.DelCtx(ctx, fmt.Sprintf("%s:%s", consts.PassCheckEmail, o.EmailOptions.Email)); err != nil {
+			return resp, err
+		}
+
 	case *gensts.SetPasswordReq_UserIdOptions:
 		user, err = s.UserMongoMapper.FindOne(ctx, o.UserIdOptions.UserId)
 		if err != nil {
