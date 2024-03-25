@@ -12,6 +12,7 @@ import (
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/mapper/user"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/stores/redis"
+	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/filter"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/sdk/cos"
 )
 
@@ -23,11 +24,11 @@ func NewStsServerImpl() (*adaptor.StsServerImpl, error) {
 		return nil, err
 	}
 	redisRedis := redis.NewRedis(configConfig)
-	userMongoMapper := user.NewMongoMapper(configConfig)
+	iUserMongoMapper := user.NewMongoMapper(configConfig)
 	authServiceImpl := &service.AuthServiceImpl{
 		Config:          configConfig,
 		Redis:           redisRedis,
-		UserMongoMapper: userMongoMapper,
+		UserMongoMapper: iUserMongoMapper,
 	}
 	cosSDK, err := cos.NewCosSDK(configConfig)
 	if err != nil {
@@ -37,10 +38,16 @@ func NewStsServerImpl() (*adaptor.StsServerImpl, error) {
 		Config: configConfig,
 		CosSDK: cosSDK,
 	}
+	illegalWordsSearch := filter.NewFilter(configConfig)
+	filterService := service.FilterService{
+		Config: configConfig,
+		Filter: illegalWordsSearch,
+	}
 	stsServerImpl := &adaptor.StsServerImpl{
-		Config:      configConfig,
-		AuthService: authServiceImpl,
-		CosService:  cosService,
+		Config:        configConfig,
+		AuthService:   authServiceImpl,
+		CosService:    cosService,
+		FilterService: filterService,
 	}
 	return stsServerImpl, nil
 }

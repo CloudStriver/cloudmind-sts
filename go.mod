@@ -3,8 +3,9 @@ module github.com/CloudStriver/cloudmind-sts
 go 1.20
 
 require (
+	github.com/CloudStriver/ToolGood v0.0.0-20240325020152-92c577d6e96d
 	github.com/CloudStriver/go-pkg v0.0.0-20240115102515-f1d7bfa047af
-	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240201094804-9bf4d9eee7a9
+	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240325034001-88b54ac0de7b
 	github.com/cloudwego/kitex v0.8.0
 	github.com/google/wire v0.5.0
 	github.com/kitex-contrib/obs-opentelemetry v0.2.5
@@ -14,7 +15,7 @@ require (
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20231121073521-dd65d8941a16
 	github.com/xh-polaris/platform-sts v1.4.34
 	github.com/zeromicro/go-zero v1.6.1
-	go.mongodb.org/mongo-driver v1.13.1
+	go.mongodb.org/mongo-driver v1.14.0
 	go.opentelemetry.io/otel/trace v1.19.0
 	google.golang.org/grpc v1.60.1
 )
@@ -99,7 +100,7 @@ require (
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
 	go.uber.org/automaxprocs v1.5.3 // indirect
 	golang.org/x/arch v0.2.0 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect

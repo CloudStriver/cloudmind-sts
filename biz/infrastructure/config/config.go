@@ -2,11 +2,12 @@ package config
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/redis"
-	"os"
 )
 
 type EmailConf struct {
@@ -32,6 +33,13 @@ type CDNConfig struct {
 	MaxTTL int
 }
 
+type FilterConfig struct {
+	UseDuplicateWordFilter        bool
+	UseDBCcaseConverter           bool
+	UseSimplifiedChineseConverter bool
+	UseIgnoreCase                 bool
+}
+
 func (c *CosConfig) CosHost() string {
 	return fmt.Sprintf("https://%s.cos.%s.myqcloud.com", c.BucketName, c.Region)
 }
@@ -49,6 +57,7 @@ type Config struct {
 	CosConfig     *CosConfig
 	FileCosConfig *CosConfig
 	CdnConfig     *CDNConfig
+	FilterConfig  *FilterConfig
 }
 
 func NewConfig() (*Config, error) {

@@ -9,8 +9,17 @@ import (
 
 type StsServerImpl struct {
 	*config.Config
-	AuthService service.AuthService
-	CosService  service.CosService
+	AuthService   service.AuthService
+	CosService    service.CosService
+	FilterService service.FilterService
+}
+
+func (s *StsServerImpl) ReplaceContent(ctx context.Context, req *sts.ReplaceContentReq) (res *sts.ReplaceContentResp, err error) {
+	return s.FilterService.ReplaceContent(ctx, req)
+}
+
+func (s *StsServerImpl) FindAllContent(ctx context.Context, req *sts.FindAllContentReq) (res *sts.FindAllContentResp, err error) {
+	return s.FilterService.FindAllContent(ctx, req)
 }
 
 func (s *StsServerImpl) GenCosSts(ctx context.Context, req *sts.GenCosStsReq) (res *sts.GenCosStsResp, err error) {
