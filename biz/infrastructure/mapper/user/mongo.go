@@ -30,14 +30,15 @@ type (
 		AppendAuth(ctx context.Context, id string, auth *Auth) error                        // 追加授权信息
 	}
 	Auth struct {
-		Type    int32  `bson:"type" json:"type"`
-		AppId   string `bson:"appId" json:"appId"`
-		UnionId string `bson:"unionId" json:"unionId"`
+		Type       int64  `bson:"type" json:"type"`
+		AppId      string `bson:"appId" json:"appId"`
+		UnionId    string `bson:"unionId" json:"unionId"`
+		PlatformId string `bson:"platformId" json:"platformId"`
 	}
 	User struct {
 		ID       primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 		PassWord string             `bson:"passWord,omitempty" json:"passWord,omitempty"`
-		Role     int32              `bson:"role,omitempty" json:"role,omitempty"`
+		Role     int64              `bson:"role,omitempty" json:"role,omitempty"`
 		Auths    []*Auth            `bson:"auths,omitempty" json:"auths,omitempty"`
 		UpdateAt time.Time          `bson:"updateAt,omitempty" json:"updateAt,omitempty"`
 		CreateAt time.Time          `bson:"createAt,omitempty" json:"createAt,omitempty"`
@@ -54,7 +55,7 @@ func (m *MongoMapper) AppendAuth(ctx context.Context, id string, auth *Auth) err
 		return err
 	}
 	key := PrefixUserCacheKey + id
-	_, err = m.conn.UpdateOne(ctx, key, bson.M{"_id": ID}, bson.M{"$push": bson.M{"auths": bson.M{"$each": []*Auth{auth}}}})
+	_, err = m.conn.UpdateOne(ctx, key, bson.M{consts.ID: ID}, bson.M{"$push": bson.M{consts.Auths: bson.M{"$each": []*Auth{auth}}}})
 	if err != nil {
 		return err
 	}
@@ -84,7 +85,7 @@ func (m *MongoMapper) UpdateById(ctx context.Context, auth *Auth, id string) (*m
 		Filters: []interface{}{bson.M{"element.type": auth.Type}},
 	})
 
-	res, err := m.conn.UpdateOne(ctx, key, bson.M{"_id": ID}, update, option)
+	res, err := m.conn.UpdateOne(ctx, key, bson.M{consts.ID: ID}, update, option)
 	return res, err
 }
 
@@ -93,9 +94,10 @@ func (m *MongoMapper) FindOneByAuth(ctx context.Context, auth *Auth) (*User, err
 	filter := bson.M{
 		"auths": bson.M{
 			"$elemMatch": bson.M{
-				"type":    auth.Type,
-				"appId":   auth.AppId,
-				"unionId": auth.UnionId,
+				consts.Type:       auth.Type,
+				consts.AppId:      auth.AppId,
+				consts.UnionId:    auth.UnionId,
+				consts.PlatformId: auth.PlatformId,
 			},
 		},
 	}
@@ -133,7 +135,7 @@ func (m *MongoMapper) FindOne(ctx context.Context, id string) (*User, error) {
 	}
 	var data User
 	key := PrefixUserCacheKey + id
-	err = m.conn.FindOne(ctx, key, &data, bson.M{"_id": oid})
+	err = m.conn.FindOne(ctx, key, &data, bson.M{consts.ID: oid})
 	switch {
 	case err == nil:
 		return &data, nil
@@ -147,7 +149,7 @@ func (m *MongoMapper) FindOne(ctx context.Context, id string) (*User, error) {
 func (m *MongoMapper) Update(ctx context.Context, data *User) (*mongo.UpdateResult, error) {
 	data.UpdateAt = time.Now()
 	key := PrefixUserCacheKey + data.ID.Hex()
-	res, err := m.conn.UpdateOne(ctx, key, bson.M{"_id": data.ID}, bson.M{"$set": data})
+	res, err := m.conn.UpdateOne(ctx, key, bson.M{consts.ID: data.ID}, bson.M{"$set": data})
 	return res, err
 }
 
@@ -157,6 +159,6 @@ func (m *MongoMapper) Delete(ctx context.Context, id string) (int64, error) {
 		return 0, err
 	}
 	key := PrefixUserCacheKey + id
-	res, err := m.conn.DeleteOne(ctx, key, bson.M{"_id": oid})
+	res, err := m.conn.DeleteOne(ctx, key, bson.M{consts.ID: oid})
 	return res, err
 }

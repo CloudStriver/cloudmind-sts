@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/config"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/consts"
-	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/convertor"
 	usermapper "github.com/CloudStriver/cloudmind-sts/biz/infrastructure/mapper/user"
 	"github.com/CloudStriver/cloudmind-sts/biz/infrastructure/util/email"
 	gensts "github.com/CloudStriver/service-idl-gen-go/kitex_gen/cloudmind/sts"
@@ -34,17 +33,29 @@ type AuthServiceImpl struct {
 	UserMongoMapper usermapper.IUserMongoMapper
 }
 
+// 添加登录方式
 func (s *AuthServiceImpl) AppendAuth(ctx context.Context, req *gensts.AppendAuthReq) (resp *gensts.AppendAuthResp, err error) {
 	resp = new(gensts.AppendAuthResp)
-	if err = s.UserMongoMapper.AppendAuth(ctx, req.UserId, convertor.AuthToAuthMapper(req.AuthInfo)); err != nil {
+	if err = s.UserMongoMapper.AppendAuth(ctx, req.UserId, &usermapper.Auth{
+		Type:       req.AuthType,
+		AppId:      req.AppId,
+		UnionId:    req.UnionId,
+		PlatformId: req.PlatFormId,
+	}); err != nil {
 		return resp, err
 	}
 	return resp, nil
 }
 
+// 通过某个登录方式登录
 func (s *AuthServiceImpl) Login(ctx context.Context, req *gensts.LoginReq) (resp *gensts.LoginResp, err error) {
 	resp = new(gensts.LoginResp)
-	user, err := s.UserMongoMapper.FindOneByAuth(ctx, convertor.AuthToAuthMapper(req.Auth))
+	user, err := s.UserMongoMapper.FindOneByAuth(ctx, &usermapper.Auth{
+		Type:       req.AuthType,
+		AppId:      req.AppId,
+		UnionId:    req.UnionId,
+		PlatformId: req.PlatFormId,
+	})
 	if errors.Is(err, consts.ErrNotFound) {
 		return resp, nil
 	}
@@ -76,6 +87,7 @@ func (s *AuthServiceImpl) CheckEmail(ctx context.Context, req *gensts.CheckEmail
 	return resp, nil
 }
 
+// 重置密码
 func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswordReq) (resp *gensts.SetPasswordResp, err error) {
 	resp = new(gensts.SetPasswordResp)
 	var user *usermapper.User
@@ -88,8 +100,7 @@ func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswo
 		if value != "true" {
 			return resp, consts.ErrNotPassEmailCheck
 		}
-
-		user, err = s.UserMongoMapper.FindOneByAuth(ctx, &usermapper.Auth{Type: int32(gensts.AuthType_email), AppId: o.EmailOptions.Email})
+		user, err = s.UserMongoMapper.FindOneByAuth(ctx, &usermapper.Auth{Type: int64(consts.EmailAuthType), AppId: o.EmailOptions.Email})
 		if err != nil {
 			return resp, err
 		}
@@ -118,6 +129,7 @@ func (s *AuthServiceImpl) SetPassword(ctx context.Context, req *gensts.SetPasswo
 	return resp, nil
 }
 
+// 发送邮件
 func (s *AuthServiceImpl) SendEmail(ctx context.Context, req *gensts.SendEmailReq) (resp *gensts.SendEmailResp, err error) {
 	resp = new(gensts.SendEmailResp)
 	code, err := email.SendEmail(ctx, s.Config.EmailConf, req.Email, req.Subject)
@@ -130,9 +142,15 @@ func (s *AuthServiceImpl) SendEmail(ctx context.Context, req *gensts.SendEmailRe
 	return resp, nil
 }
 
+// 注册
 func (s *AuthServiceImpl) CreateAuth(ctx context.Context, req *gensts.CreateAuthReq) (resp *gensts.CreateAuthResp, err error) {
 	resp = new(gensts.CreateAuthResp)
-	auth := convertor.AuthToAuthMapper(req.AuthInfo)
+	auth := &usermapper.Auth{
+		Type:       req.AuthType,
+		AppId:      req.AppId,
+		UnionId:    req.UnionId,
+		PlatformId: req.PlatFormId,
+	}
 	_, err = s.UserMongoMapper.FindOneByAuth(ctx, auth)
 	switch {
 	case err == nil:
@@ -142,9 +160,14 @@ func (s *AuthServiceImpl) CreateAuth(ctx context.Context, req *gensts.CreateAuth
 	default:
 		return resp, err
 	}
+
+	password := req.Password
+	if password == "" {
+		password = consts.DefaultPassword
+	}
 	resp.UserId, err = s.UserMongoMapper.Insert(ctx, &usermapper.User{
-		PassWord: req.UserInfo.GetPassword(),
-		Role:     int32(req.UserInfo.Role),
+		PassWord: password,
+		Role:     req.Role,
 		Auths:    []*usermapper.Auth{auth},
 	})
 	if err != nil {
