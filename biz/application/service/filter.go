@@ -40,20 +40,20 @@ func (s *FilterService) ReplaceContent(ctx context.Context, req *gensts.ReplaceC
 }
 
 func (s *FilterService) FindAllContent(ctx context.Context, req *gensts.FindAllContentReq) (resp *gensts.FindAllContentResp, err error) {
-	keywords := make([]*gensts.Keywords, len(req.Contents))
+	keywords := make([]string, 0)
 	wg := sync.WaitGroup{}
 	wg.Add(len(req.Contents))
 	for i, content := range req.Contents {
 		go func(i int, content string) {
 			defer wg.Done()
-			keywords[i] = &gensts.Keywords{
-				Keywords: lo.Map[*ToolGood.IllegalWordsSearchResult, string](s.Filter.FindAll(content), func(item *ToolGood.IllegalWordsSearchResult, index int) string {
-					return item.Keyword
-				}),
-			}
+			keywords = append(keywords, lo.Map[*ToolGood.IllegalWordsSearchResult, string](s.Filter.FindAll(content), func(item *ToolGood.IllegalWordsSearchResult, index int) string {
+				return item.Keyword
+			})...)
 		}(i, content)
 	}
 	wg.Wait()
+	keywords = lo.Uniq(keywords)
+
 	return &gensts.FindAllContentResp{
 		Keywords: keywords,
 	}, nil

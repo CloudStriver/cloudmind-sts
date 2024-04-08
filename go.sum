@@ -8,8 +8,8 @@ github.com/CloudStriver/ToolGood v0.0.0-20240325020152-92c577d6e96d h1:UQZIfnbd6
 github.com/CloudStriver/ToolGood v0.0.0-20240325020152-92c577d6e96d/go.mod h1:ajuYgkvZmBaZx+gQF5rhCG3nS4ARFWN6gPKLV55k0j0=
 github.com/CloudStriver/go-pkg v0.0.0-20240115102515-f1d7bfa047af h1:tl3MgdfL4fOkZxFYqqLXYr6dEk5TvT/hGe06uoB+spY=
 github.com/CloudStriver/go-pkg v0.0.0-20240115102515-f1d7bfa047af/go.mod h1:RMjN80WnoDiqHZIsv27u9BxJ9axldr+elFRHgSjhXnY=
-github.com/CloudStriver/service-idl-gen-go v0.0.0-20240325034001-88b54ac0de7b h1:6zvFftlk5rgfupBg+Ye4w3dScuA6ymUQJICHxI2q30g=
-github.com/CloudStriver/service-idl-gen-go v0.0.0-20240325034001-88b54ac0de7b/go.mod h1:chtR82RvfrjUujTGWROSCNAwF9Lh/U959k34bXIDvBI=
+github.com/CloudStriver/service-idl-gen-go v0.0.0-20240408085139-5bcd9d9c4a21 h1:msEIkCNxMJvdIEdIEboQP1TvUh8JD6Dq3BMpquE6YPc=
+github.com/CloudStriver/service-idl-gen-go v0.0.0-20240408085139-5bcd9d9c4a21/go.mod h1:chtR82RvfrjUujTGWROSCNAwF9Lh/U959k34bXIDvBI=
 github.com/QcloudApi/qcloud_sign_golang v0.0.0-20141224014652-e4130a326409/go.mod h1:1pk82RBxDY/JZnPQrtqHlUFfCctgdorsd9M06fMynOM=
 github.com/ajstarks/deck v0.0.0-20200831202436-30c9fc6549a9/go.mod h1:JynElWSGnm/4RlzPXRlREEwqTHAN3T56Bv2ITsFT3gY=
 github.com/ajstarks/deck/generate v0.0.0-20210309230005-c3f852c02e19/go.mod h1:T13YZdzov6OU0A1+RfKZiZN9ca6VeKdBdyDV+BY97Tk=

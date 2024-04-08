@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/CloudStriver/ToolGood v0.0.0-20240325020152-92c577d6e96d
 	github.com/CloudStriver/go-pkg v0.0.0-20240115102515-f1d7bfa047af
-	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240325034001-88b54ac0de7b
+	github.com/CloudStriver/service-idl-gen-go v0.0.0-20240408085139-5bcd9d9c4a21
 	github.com/cloudwego/kitex v0.8.0
 	github.com/google/wire v0.5.0
 	github.com/kitex-contrib/obs-opentelemetry v0.2.5
