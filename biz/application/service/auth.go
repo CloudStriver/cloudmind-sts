@@ -63,6 +63,9 @@ func (s *AuthServiceImpl) Login(ctx context.Context, req *gensts.LoginReq) (resp
 		return resp, err
 	}
 
+	if req.Password == "" {
+		req.Password = consts.DefaultPassword
+	}
 	if user.PassWord != req.Password {
 		return resp, consts.ErrPasswordNotEqual
 	}
